@@ -16,7 +16,6 @@ constructor(props) {
         playerDetail:{},
         datasource:new ListView.DataSource({rowHasChanged: (r1, r2) => r1!==r2}),
         datasource1:new ListView.DataSource({rowHasChanged: (r1, r2) => r1!==r2}),
-        tabstatus:'',
         gameName:'',
         playerCount:'',
         loading:false,
@@ -50,25 +49,18 @@ componentWillMount(){
     AsyncStorage.getItem('gameDetails').then((value) => {
     jsonData = JSON.parse(value)
     this.setState({"gameDetails":jsonData})
-   
     if(Object.keys(jsonData).length>0){
-                 this.setState({gamestatus:'player'});
+       this.setState({gamestatus:'player'});
     }
-
 	});
     AsyncStorage.getItem('gameName').then((value) => {
-
     this.setState({"gameName":value})
-
 	});
 }
 
 incrementCount(role){
-
 		console.log(role)
-
 	if(role==1){
-
 		this.state.mafiaCount = this.state.mafiaCount+1;
 		this.setState({mafiaCount:this.state.mafiaCount});
 	}
@@ -106,7 +98,6 @@ incrementCount(role){
 decrementCount(role){
 
 	if(role==1){
-
 		this.state.mafiaCount = this.state.mafiaCount-1;
 		this.setState({mafiaCount:this.state.mafiaCount});
 	}
@@ -141,7 +132,6 @@ decrementCount(role){
 }
     
 addRoles(){
-    
     var roleJson = {}
     roleJson["1"] = this.state.mafiaCount
     roleJson["2"] = this.state.detective
@@ -151,20 +141,15 @@ addRoles(){
     roleJson["6"] = this.state.silencer
     roleJson["7"] = this.state.terrorist
     roleJson["8"] = this.state.civilian
-    
-     url= "https://mafias.herokuapp.com/api/addRoles/?gameName="+this.state.gameName+"&roles="+JSON.stringify(roleJson);
+    url= "https://mafias.herokuapp.com/api/addRoles/?gameName="+this.state.gameName+"&roles="+JSON.stringify(roleJson);
     console.log(url);
     return fetch(url)
       .then((response) => response.json())
       .then((responseArray) => {
-
         console.log(responseArray)
-        if(responseArray.status == "success"){
-                 
+        if(responseArray.status == "success"){  
                  this.setState({"loading":false})
                  this.setState({"gamestatus":'player'})
-
-
         }
         else{
         this.closeServiceModal()
@@ -178,103 +163,135 @@ addRoles(){
       });
 }
 
+    assign(){
+
+    if(this.state.gameName == ''){
+      
+      Alert.alert('Enter game name')
+    }
+    else{
+     this.setState({"loading":true})
+     url= "https://mafias.herokuapp.com/api/assignRoles/?gameName="+this.state.gameName
+     console.log(url)
+    return fetch(url)
+      .then((response) => response.json())
+      .then((responseArray) => {
+
+        console.log(responseArray)
+        if(responseArray.status == "success"){
+            Alert.alert('Success',"Assigned Roles successfully")
+        }
+        else{
+            Alert.alert('Error',"Error in updateing service"+responseArray.message)
+        }
+
+        })
+      .catch((error) => {
+        
+      });
+    }
+  }
 	render(){
+        const {thisComponent} = this.props;
         gamestatus = this.state.gamestatus
 		gamedetail = this.state.playerDetail
 
-		if(gamestatus=='player')
-		{
-		return(
-			<View style={{flex:1}}>
-      <HytteNavBar title="Mafia Moderator"/>
-      <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
-      <View style={[styles.creamBackGround,{alignItems: 'center',flexDirection:'row'}]}>
-          {/*<Text>{JSON.stringify(gamedetail)}</Text>*/}
-          <ListView
-        dataSource={this.state.datasource.cloneWithRows(this.state.playerlist)}
-        renderRow={(data) => <View><Text>{data}</Text></View>}
-      />
-          <ListView
-        dataSource={this.state.datasource1.cloneWithRows(this.state.rolelist)}
-        renderRow={(data) => <View><Text>{data}</Text></View>}
-      />
-          
-      </View>
-      </View>
-			)
-	}
-	else{
-	return(
-	<View style={{flex:1}}>s
-     <HytteNavBar title="Mafia Moderator"/>
-     <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
-     <View style={[styles.creamBackGround,{alignItems: 'center'}]}>
-	     <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Mafia</Text>
-	     <Text onPress={()=>this.incrementCount(1)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.mafiaCount}</Text>
-	      <Text onPress={()=>this.decrementCount(1)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
+		if(gamestatus=='player'){
+            return(
+                <View style={{flex:1}}>
+                  <HytteNavBar title="Mafia Moderator"/>
+                  <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
+                  <TouchableOpacity onPress={() => this.assign()}   style={{justifyContent: 'center',alignItems: 'center'}} underlayColor="white">
+                    <View style={styles.primaryButton} >
+                      <Text style={styles.buttonText}>Assign Roles</Text>
+                    </View>
+                  </TouchableOpacity>
+                    <View style={[styles.creamBackGround,{alignItems: 'center',flexDirection:'row'}]}>
+                      {/*<Text>{JSON.stringify(gamedetail)}</Text>*/}
+                      <ListView
+                    dataSource={this.state.datasource.cloneWithRows(this.state.playerlist)}
+                    renderRow={(data) => <View><Text>{data}</Text></View>}
+                  />
+                      <ListView
+                    dataSource={this.state.datasource1.cloneWithRows(this.state.rolelist)}
+                    renderRow={(data) => <View><Text>{data}</Text></View>}
+                  />
+                  </View>
+                    <View ><Text onPress={()=>thisComponent.setState({tabstatus:'',loading:false})} style={styles.linkText}>Back</Text></View>
+                  </View>
+            )
+   }else if(gamestatus=="role"){
+        return(
+        <View style={{flex:1}}>
+         <HytteNavBar title="Mafia Moderator"/>
+         <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
+         <View style={[styles.creamBackGround,{alignItems: 'center'}]}>
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Mafia</Text>
+             <Text onPress={()=>this.incrementCount(1)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.mafiaCount}</Text>
+              <Text onPress={()=>this.decrementCount(1)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
 
-	     <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Civilian</Text>
-	     <Text onPress={()=>this.incrementCount(8)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.civilian}</Text>
-	      <Text onPress={()=>this.decrementCount(8)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
-         
-         <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Joker</Text>
-	     <Text onPress={()=>this.incrementCount(3)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.joker}</Text>
-	      <Text onPress={()=>this.decrementCount(3)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
-         
-         <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Angel</Text>
-	     <Text onPress={()=>this.incrementCount(4)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.angel}</Text>
-	      <Text onPress={()=>this.decrementCount(4)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
-         
-         <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Detective</Text>
-	     <Text onPress={()=>this.incrementCount(2)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.detective}</Text>
-	      <Text onPress={()=>this.decrementCount(2)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
-         
-         <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Sheela</Text>
-	     <Text onPress={()=>this.incrementCount(5)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.sheela}</Text>
-	      <Text onPress={()=>this.decrementCount(5)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
-         
-         <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Terrorist</Text>
-	     <Text onPress={()=>this.incrementCount(7)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.terrorist}</Text>
-	      <Text onPress={()=>this.decrementCount(7)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
-         
-         <View style={{flexDirection:'row',padding:10,marginTop:10}}>
-	     <Text style={{fontSize:18}}>Silencer</Text>
-	     <Text onPress={()=>this.incrementCount(6)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
-	     <Text style={{fontSize:18,marginLeft:18}}>{this.state.silencer}</Text>
-	      <Text onPress={()=>this.decrementCount(6)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
-	     </View>
-         
-         <TouchableOpacity onPress={() => this.addRoles()}   style={{justifyContent: 'center',alignItems: 'center'}} underlayColor="white">
-          <View style={styles.primaryButton} >
-            <Text style={styles.buttonText}>Join</Text>
-          </View>
-        </TouchableOpacity>
-     </View>
-     </View>
-     );
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Civilian</Text>
+             <Text onPress={()=>this.incrementCount(8)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.civilian}</Text>
+              <Text onPress={()=>this.decrementCount(8)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
 
-	}
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Joker</Text>
+             <Text onPress={()=>this.incrementCount(3)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.joker}</Text>
+              <Text onPress={()=>this.decrementCount(3)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
+
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Angel</Text>
+             <Text onPress={()=>this.incrementCount(4)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.angel}</Text>
+              <Text onPress={()=>this.decrementCount(4)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
+
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Detective</Text>
+             <Text onPress={()=>this.incrementCount(2)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.detective}</Text>
+              <Text onPress={()=>this.decrementCount(2)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
+
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Sheela</Text>
+             <Text onPress={()=>this.incrementCount(5)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.sheela}</Text>
+              <Text onPress={()=>this.decrementCount(5)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
+
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Terrorist</Text>
+             <Text onPress={()=>this.incrementCount(7)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.terrorist}</Text>
+              <Text onPress={()=>this.decrementCount(7)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
+
+             <View style={{flexDirection:'row',padding:10,marginTop:10}}>
+             <Text style={{fontSize:18}}>Silencer</Text>
+             <Text onPress={()=>this.incrementCount(6)} style={{color:'#1c58d8',fontSize:20,marginLeft:50}}>+</Text>
+             <Text style={{fontSize:18,marginLeft:18}}>{this.state.silencer}</Text>
+              <Text onPress={()=>this.decrementCount(6)} style={{color:'#1c58d8',fontSize:20,marginLeft:18}}>-</Text>
+             </View>
+
+             <TouchableOpacity onPress={() => this.addRoles()}   style={{justifyContent: 'center',alignItems: 'center'}} underlayColor="white">
+              <View style={styles.primaryButton} >
+                <Text style={styles.buttonText}>Join</Text>
+              </View>
+            </TouchableOpacity>
+         </View>
+         </View>
+         );
+
+    }
 	}
 
 }

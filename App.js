@@ -77,6 +77,7 @@ export default class App extends React.Component {
         console.log(responseArray)
         if(responseArray.status == "success"){
                  AsyncStorage.setItem("gameDetails",JSON.stringify(responseArray.message));
+                AsyncStorage.setItem("gameName",this.state.gameName);
                  this.setState({"loading":false})
                 this.setState({"tabstatus":'game'})
                 this.setState({"gameDetails":responseArray.message})
@@ -96,9 +97,7 @@ export default class App extends React.Component {
       });
     }
   }
-
   render() {
-    tabstatus = this.state.tabstatus
     loading = this.state.loading
 
     indicator = <View></View>
@@ -107,7 +106,7 @@ export default class App extends React.Component {
             indicator =   <ActivityIndicator size="large" color='#F79F1A' />
     }
 
-    if(tabstatus == ''){
+    if(this.state.tabstatus == ''){
     return (
       <View style={{flex:1}}>
       <HytteNavBar title="Mafia Moderator"/>
@@ -128,7 +127,7 @@ export default class App extends React.Component {
       </View>
     );
     }
-    else if(tabstatus=='create'){
+    else if(this.state.tabstatus=='create'){
 
       return (
       <View style={{flex:1}}>
@@ -151,7 +150,7 @@ export default class App extends React.Component {
     );
 
     }
-    else if(tabstatus=='join'){
+    else if(this.state.tabstatus=='join'){
 
       return (
       <View style={{flex:1}}>
@@ -173,9 +172,9 @@ export default class App extends React.Component {
     );
     }
 
-    else if(tabstatus=='game'){
+    else if(this.state.tabstatus=='game'){
       return(
-        <Game/>
+        <Game thisComponent={this}/>
         )
     }
   }
