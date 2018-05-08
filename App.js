@@ -40,6 +40,7 @@ export default class App extends React.Component {
                  
                
                 AsyncStorage.setItem("gameDetails",'{}');
+                AsyncStorage.setItem("gameName",this.state.gameName);
                  this.setState({"loading":false})
                 this.setState({"tabstatus":'game'})
                 this.setState({"gameDetails":{}})
