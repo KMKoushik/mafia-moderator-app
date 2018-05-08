@@ -1,31 +1,44 @@
 import React from 'react';
-import { StyleSheet, Text, View ,StatusBar,ScrollView,TouchableOpacity,TextInput,Alert,ActivityIndicator,AsyncStorage} from 'react-native';
+import { StyleSheet, Text, View ,StatusBar,ScrollView,TouchableOpacity,TextInput,Alert,ActivityIndicator,AsyncStorage,ListView} from 'react-native';
 import styles from '../ReactLibrary/styles';
 import {HytteNavBar} from '../ReactLibrary/HytteComponents'
+import constants from '../constants'
 
 export default class App extends React.Component {
 
 
 constructor(props) {
-      super(props);
-      this.state = {
-      tabstatus:'',
-      gameName:'',
-      playerCount:'',
-      loading:false,
-      gameDetails:{},
-      mafiaCount:0,
-      civilian:0,
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    super(props);
+    this.state = {
+        rolelist:[],
+        playerlist:[],
+        playerDetail:{},
+        datasource:new ListView.DataSource({rowHasChanged: (r1, r2) => r1!==r2}),
+        datasource1:new ListView.DataSource({rowHasChanged: (r1, r2) => r1!==r2}),
+        tabstatus:'',
+        gameName:'',
+        playerCount:'',
+        loading:false,
+        mafiaCount:0,
+        civilian:0,
     }
+    AsyncStorage.getItem('gameDetails').then((value) => {
+        gameDetails = JSON.parse(value);
+        playerDetails = gameDetails.playerDetail;
+        rolelist = [], playerlist = [];
+        playerDetails && Object.keys(playerDetails).forEach(function(key) {
+          playerlist.push(key);
+          rolelist.push(constants.roleConstants[playerDetails[key]]);
+        });
+        this.state.rolelist = rolelist;
+        this.state.playerlist = playerlist;
+        this.setState({datasource : ds.cloneWithRows(this.state.rolelist)});
+        this.setState({datasource1 : ds.cloneWithRows(this.state.playerlist)});
+    });
 }
 
 componentWillMount(){
-
-    AsyncStorage.getItem('gameDetails').then((value) => {
-
-    this.setState({"gameDetails":JSON.parse(value)})
-
-	});
 }
 
 incrementCount(role){
@@ -58,24 +71,33 @@ decrementCount(role){
 }
 
 	render(){
-		gamedetail = this.state.gameDetails
-		console.log(this.state.gameDetails)
+        
+		gamedetail = this.state.playerDetail
 
-		if(this.state.gameDetails.playerDetail)
+		if(this.state.playerDetail)
 		{
 		return(
 			<View style={{flex:1}}>
       <HytteNavBar title="Mafia Moderator"/>
       <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
       <View style={[styles.creamBackGround,{alignItems: 'center',flexDirection:'row'}]}>
-       <Text>{JSON.stringify(gamedetail)}</Text>
+          {/*<Text>{JSON.stringify(gamedetail)}</Text>*/}
+          <ListView
+        dataSource={this.state.datasource.cloneWithRows(this.state.playerlist)}
+        renderRow={(data) => <View><Text>{data}</Text></View>}
+      />
+          <ListView
+        dataSource={this.state.datasource1.cloneWithRows(this.state.rolelist)}
+        renderRow={(data) => <View><Text>{data}</Text></View>}
+      />
+          
       </View>
       </View>
 			)
 	}
 	else{
 	return(
-	<View style={{flex:1}}>
+	<View style={{flex:1}}>s
      <HytteNavBar title="Mafia Moderator"/>
      <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
      <View style={[styles.creamBackGround,{alignItems: 'center'}]}>

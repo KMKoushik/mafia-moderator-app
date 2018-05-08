@@ -75,11 +75,11 @@ export default class App extends React.Component {
 
         console.log(responseArray)
         if(responseArray.status == "success"){
-                 
+                 AsyncStorage.setItem("gameDetails",JSON.stringify(responseArray.message));
                  this.setState({"loading":false})
                 this.setState({"tabstatus":'game'})
                 this.setState({"gameDetails":responseArray.message})
-                AsyncStorage.setItem("gameDetails",JSON.stringify(responseArray.message));
+                
 
 
         }
