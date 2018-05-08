@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View ,StatusBar,ScrollView,TouchableOpacity,TextInput,Alert,ActivityIndicator,AsyncStorage,ListView} from 'react-native';
-import styles from '../ReactLibrary/styles';
-import {HytteNavBar} from '../ReactLibrary/HytteComponents'
+import styles from '../libraries/styles';
+import {HytteNavBar} from '../libraries/HytteComponents'
 import constants from '../constants'
 
 export default class App extends React.Component {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View ,StatusBar,ScrollView,TouchableOpacity,TextInput,Alert,ActivityIndicator,AsyncStorage} from 'react-native';
-import styles from './ReactLibrary/styles';
-import {HytteNavBar} from './ReactLibrary/HytteComponents'
+import styles from './libraries/styles';
+import {HytteNavBar} from './libraries/HytteComponents'
 import Game from './screens/game'
 
 
