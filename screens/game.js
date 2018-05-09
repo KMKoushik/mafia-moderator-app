@@ -8,7 +8,6 @@ export default class App extends React.Component {
 
 
 constructor(props) {
-    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     super(props);
     this.state = {
         rolelist:[],
@@ -21,7 +20,7 @@ constructor(props) {
         loading:false,
         mafiaCount:0,
         civilian:0,
-		joker:0,
+		    joker:0,
         angel:0,
         detective:0,
         silencer:0,
@@ -30,17 +29,7 @@ constructor(props) {
         gamestatus:'role',
     }
     AsyncStorage.getItem('gameDetails').then((value) => {
-        gameDetails = JSON.parse(value);
-        playerDetails = gameDetails.playerDetail;
-        rolelist = [], playerlist = [];
-        playerDetails && Object.keys(playerDetails).forEach(function(key) {
-          playerlist.push(key);
-          rolelist.push(constants.roleConstants[playerDetails[key]]);
-        });
-        this.state.rolelist = rolelist;
-        this.state.playerlist = playerlist;
-        this.setState({datasource : ds.cloneWithRows(this.state.rolelist)});
-        this.setState({datasource1 : ds.cloneWithRows(this.state.playerlist)});
+        this.renderPlayerDetails(value);
     });
 }
 
@@ -58,6 +47,22 @@ componentWillMount(){
 	});
 }
 
+renderPlayerDetails(value){
+  console.log("Value : " + value)
+  const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+  gameDetails = JSON.parse(value);
+  console.log("GameDetails : " +gameDetails)
+  playerDetails = gameDetails.playerDetail;
+  rolelist = [], playerlist = [];
+  playerDetails && Object.keys(playerDetails).forEach(function(key) {
+    playerlist.push(key);
+    rolelist.push(constants.roleConstants[playerDetails[key]]);
+  });
+  this.state.rolelist = rolelist;
+  this.state.playerlist = playerlist;
+  this.setState({datasource : ds.cloneWithRows(this.state.rolelist)});
+  this.setState({datasource1 : ds.cloneWithRows(this.state.playerlist)});
+}
 incrementCount(role){
 		console.log(role)
 	if(role==1){
@@ -150,11 +155,9 @@ addRoles(){
         if(responseArray.status == "success"){  
                  this.setState({"loading":false})
                  this.setState({"gamestatus":'player'})
-        }
-        else{
-        this.closeServiceModal()
-        Alert.alert('Error',"Error in updateing service"+responseArray.message)
-
+        }else{
+          this.closeServiceModal()
+          Alert.alert('Error',"Error in updateing service"+responseArray.message)
         }
 
         })
@@ -176,10 +179,13 @@ addRoles(){
     return fetch(url)
       .then((response) => response.json())
       .then((responseArray) => {
-
         console.log(responseArray)
         if(responseArray.status == "success"){
-            Alert.alert('Success',"Assigned Roles successfully")
+          //Alert.alert('Success',"Assigned Roles successfully")
+          AsyncStorage.setItem("gameDetails",JSON.stringify(responseArray.message));
+          AsyncStorage.setItem("gameName",this.state.gameName);
+          this.setState({"loading":false})
+          this.renderPlayerDetails(JSON.stringify(responseArray.message))
         }
         else{
             Alert.alert('Error',"Error in updateing service"+responseArray.message)
@@ -192,8 +198,8 @@ addRoles(){
     }
   }
 	render(){
-        const {thisComponent} = this.props;
-        gamestatus = this.state.gamestatus
+    const {thisComponent} = this.props;
+    gamestatus = this.state.gamestatus
 		gamedetail = this.state.playerDetail
 
 		if(gamestatus=='player'){

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View ,StatusBar,ScrollView,TouchableOpacity,TextInput
 import styles from './libraries/styles';
 import {HytteNavBar} from './libraries/HytteComponents'
 import Game from './screens/game'
+import Player from './screens/player'
 
 
 
@@ -15,7 +16,8 @@ export default class App extends React.Component {
       gameName:'',
       playerCount:'',
       loading:false,
-      gameDetails:{}
+      gameDetails:{},
+      playerName:'',
     }
 
   this.create = this.create.bind(this);
@@ -24,7 +26,6 @@ export default class App extends React.Component {
 
   create(){
     if(this.state.gameName == ''){
-      
       Alert.alert('Enter game name')
     }
     else{
@@ -37,8 +38,6 @@ export default class App extends React.Component {
 
         console.log(responseArray)
         if(responseArray.status == "success"){
-                 
-               
                 AsyncStorage.setItem("gameDetails",'{}');
                 AsyncStorage.setItem("gameName",this.state.gameName);
                  this.setState({"loading":false})
@@ -63,7 +62,6 @@ export default class App extends React.Component {
   join(){
 
     if(this.state.gameName == ''){
-      
       Alert.alert('Enter game name')
     }
     else{
@@ -76,14 +74,11 @@ export default class App extends React.Component {
 
         console.log(responseArray)
         if(responseArray.status == "success"){
-                 AsyncStorage.setItem("gameDetails",JSON.stringify(responseArray.message));
-                AsyncStorage.setItem("gameName",this.state.gameName);
-                 this.setState({"loading":false})
-                this.setState({"tabstatus":'game'})
-                this.setState({"gameDetails":responseArray.message})
-                
-
-
+          AsyncStorage.setItem("gameDetails",JSON.stringify(responseArray.message));
+          AsyncStorage.setItem("gameName",this.state.gameName);
+          this.setState({"loading":false})
+          this.setState({"tabstatus":'game'})
+          this.setState({"gameDetails":responseArray.message})
         }
         else{
         this.closeServiceModal()
@@ -97,6 +92,33 @@ export default class App extends React.Component {
       });
     }
   }
+
+  playerJoin(){
+    if(this.state.gameName == ''){
+      Alert.alert('Enter game name')
+    }
+    else{
+     this.setState({"loading":true})
+     url= "https://mafias.herokuapp.com/api/addPlayer/?gameName="+this.state.gameName+"&playerName="+this.state.playerName
+     console.log(url)
+    return fetch(url)
+      .then((response) => response.json())
+      .then((responseArray) => {
+        console.log(responseArray)
+        if(responseArray.status == "success"){
+          AsyncStorage.setItem("gameName",this.state.gameName);
+          this.setState({"loading":false})
+          this.setState({"tabstatus":'player'})
+        }else{
+          Alert.alert('Error',"Error in updateing service"+responseArray.message)
+        }
+      })
+      .catch((error) => {
+        
+      });
+    }
+  }
+
   render() {
     loading = this.state.loading
 
@@ -111,24 +133,33 @@ export default class App extends React.Component {
       <View style={{flex:1}}>
       <HytteNavBar title="Mafia Moderator"/>
       <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
-      <View style={[styles.creamBackGround,styles.splashScreen,{flexDirection:'row'}]}>
+      <View style={[styles.creamBackGround,styles.splashScreen]}>
+      <Text >Moderator Menu</Text>
+        <View style={{flexDirection:'row'}}>
         <TouchableOpacity    underlayColor="white" style={{margin:5}} onPress={()=>this.setState({tabstatus:'create'})}>
             <View style={styles.smallOrangeButton} >
                   <Text style={[styles.smallButtonText,{color:'#fff'}]}>Create Game</Text>
                 </View>
           </TouchableOpacity>
 
-          <TouchableOpacity    underlayColor="white" onPress={()=>this.setState({tabstatus:'join'})}>
+          <TouchableOpacity    underlayColor="white" style={{margin:5}} onPress={()=>this.setState({tabstatus:'join'})}>
             <View style={[styles.smallOrangeButton]} >
                   <Text style={[styles.smallButtonText,{color:'#fff'}]}>Join Game</Text>
                 </View>
           </TouchableOpacity>
+        </View>
+        <Text >Player Menu</Text>
+      <View >
+      <TouchableOpacity underlayColor="white" onPress={()=>this.setState({tabstatus:'playerjoin'})}>
+        <View style={[styles.smallOrangeButton]} >
+              <Text style={[styles.smallButtonText,{color:'#fff'}]}>Player</Text>
+            </View>
+      </TouchableOpacity>
+      </View>
       </View>
       </View>
     );
-    }
-    else if(this.state.tabstatus=='create'){
-
+    }else if(this.state.tabstatus=='create'){
       return (
       <View style={{flex:1}}>
       <HytteNavBar title="Mafia Moderator"/>
@@ -148,9 +179,7 @@ export default class App extends React.Component {
       </ScrollView>
       </View>
     );
-
-    }
-    else if(this.state.tabstatus=='join'){
+    }else if(this.state.tabstatus=='join'){
 
       return (
       <View style={{flex:1}}>
@@ -170,11 +199,33 @@ export default class App extends React.Component {
       </ScrollView>
       </View>
     );
-    }
-
-    else if(this.state.tabstatus=='game'){
+    }else if(this.state.tabstatus=='playerjoin'){
+      return (
+      <View style={{flex:1}}>
+      <HytteNavBar title="Player Menu"/>
+      <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
+      <ScrollView style={styles.creamBackGround} >
+      <View style={{justifyContent: 'center',alignItems: 'center'}}>
+      <TextInput  style={[styles.primaryTextInput,{marginTop:25}]} placeholder="Game Name" autoCorrect={false}   onChangeText={(gameName) => this.setState({gameName})}/>
+      <TextInput  style={[styles.primaryTextInput,{marginTop:25}]} placeholder="Your Name" autoCorrect={false}   onChangeText={(playerName) => this.setState({playerName})}/>
+      <TouchableOpacity onPress = {()=> this.playerJoin()}  style={{justifyContent: 'center',alignItems: 'center'}} underlayColor="white">
+          <View style={styles.primaryButton} >
+            <Text style={styles.buttonText}>Join Game</Text>
+          </View>
+        </TouchableOpacity>
+      <Text onPress={()=>this.setState({tabstatus:'',loading:false})} style={styles.linkText}>Back</Text>
+      {indicator}
+      </View>
+      </ScrollView>
+      </View>
+    );
+    }else if(this.state.tabstatus=='game'){
       return(
         <Game thisComponent={this}/>
+        )
+    }else if(this.state.tabstatus=='player'){
+      return(
+        <Player thisComponent={this}/>
         )
     }
   }
