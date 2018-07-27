@@ -20,6 +20,7 @@ module.exports= {
 
   cardView:{
     margin:5,
+    padding: 5,
     backgroundColor:backgroundColor,
     borderWidth: .5,
   borderRadius: 3,
@@ -68,8 +69,8 @@ module.exports= {
 
   creamBackGround:{
     flex:1,
+    margin:10,
     backgroundColor:creamClr
-
   },
 
   scrollsplashScreen :{

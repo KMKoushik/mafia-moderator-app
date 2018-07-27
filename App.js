@@ -30,7 +30,7 @@ export default class App extends React.Component {
     }
     else{
      this.setState({"loading":true})
-     url= "https://mafias.herokuapp.com/api/createNewGame/?gameName="+this.state.gameName+"&playerCount="+this.state.playerCount
+     url= "https://mafias.herokuapp.com/api/createNewGame/?gameName="+this.state.gameName+"&playerCount="+this.state.playerCount+"&passcode="+this.state.passcode
      console.log(url)
     return fetch(url)
       .then((response) => response.json())
@@ -47,8 +47,10 @@ export default class App extends React.Component {
 
         }
         else{
-        this.closeServiceModal()
-        Alert.alert('Error',"Error in updateing service"+responseArray.message)
+       // this.closeServiceModal()
+        Alert.alert('Error',responseArray.message)
+        this.setState({"loading":false})
+
 
         }
 
@@ -66,7 +68,7 @@ export default class App extends React.Component {
     }
     else{
      this.setState({"loading":true})
-     url= "https://mafias.herokuapp.com/api/moderatorJoin/?gameName="+this.state.gameName
+     url= "https://mafias.herokuapp.com/api/moderatorJoin/?gameName="+this.state.gameName+"&passcode="+this.state.passcode
      console.log(url)
     return fetch(url)
       .then((response) => response.json())
@@ -81,8 +83,9 @@ export default class App extends React.Component {
           this.setState({"gameDetails":responseArray.message})
         }
         else{
-        this.closeServiceModal()
-        Alert.alert('Error',"Error in updateing service"+responseArray.message)
+        //this.closeServiceModal()
+        this.setState({"loading":false})
+        Alert.alert('Error',responseArray.message)
 
         }
 
@@ -133,29 +136,29 @@ export default class App extends React.Component {
       <View style={{flex:1}}>
       <HytteNavBar title="Mafia Moderator"/>
       <StatusBar  barStyle="light-content"  backgroundColor="#F79F1A"/>
-      <View style={[styles.creamBackGround,styles.splashScreen]}>
-      <Text >Moderator Menu</Text>
-        <View style={{flexDirection:'row'}}>
-        <TouchableOpacity    underlayColor="white" style={{margin:5}} onPress={()=>this.setState({tabstatus:'create'})}>
+      <View style={[styles.creamBackGround,styles.splashScreen,{justifyContent:  'flex-start'}]}>
+        <View style={[styles.cardView,{marginTop:50}]}>
+        <Text style={{margin:5, fontSize: 20,fontWeight: 'bold', color:'#7d8080'}}>Moderator</Text>
+        <TouchableOpacity    underlayColor="white" onPress={()=>this.setState({tabstatus:'create'})}>
             <View style={styles.smallOrangeButton} >
                   <Text style={[styles.smallButtonText,{color:'#fff'}]}>Create Game</Text>
                 </View>
           </TouchableOpacity>
 
-          <TouchableOpacity    underlayColor="white" style={{margin:5}} onPress={()=>this.setState({tabstatus:'join'})}>
+          <TouchableOpacity    underlayColor="white" onPress={()=>this.setState({tabstatus:'join'})}>
             <View style={[styles.smallOrangeButton]} >
                   <Text style={[styles.smallButtonText,{color:'#fff'}]}>Join Game</Text>
                 </View>
           </TouchableOpacity>
         </View>
-        <Text >Player Menu</Text>
-      <View >
-      <TouchableOpacity underlayColor="white" onPress={()=>this.setState({tabstatus:'playerjoin'})}>
+        <View style={[styles.cardView]}>
+        <Text style={{margin:5, fontSize: 20,fontWeight: 'bold', color:'#7d8080'}}>Player</Text>
+        <TouchableOpacity underlayColor="white" onPress={()=>this.setState({tabstatus:'playerjoin'})}>
         <View style={[styles.smallOrangeButton]} >
               <Text style={[styles.smallButtonText,{color:'#fff'}]}>Player</Text>
-            </View>
-      </TouchableOpacity>
-      </View>
+        </View>
+        </TouchableOpacity>
+        </View>
       </View>
       </View>
     );
@@ -168,6 +171,7 @@ export default class App extends React.Component {
       <View style={{justifyContent: 'center',alignItems: 'center'}}>
       <TextInput  style={[styles.primaryTextInput,{marginTop:25}]} placeholder="Game Name" autoCorrect={false}   onChangeText={(gameName) => this.setState({gameName})}/>
       <TextInput  style={[styles.primaryTextInput,{marginTop:25}]}    keyboardType='numeric' placeholder="Player Count" autoCorrect={false}   onChangeText={(playerCount) => this.setState({playerCount})}/>
+      <TextInput  style={[styles.primaryTextInput,{marginTop:25}]}  keyboardType='numeric'  secureTextEntry={true} placeholder="Passcode" autoCorrect={false}   onChangeText={(passcode) => this.setState({passcode})}/>
       <TouchableOpacity onPress = {()=> this.create()}  style={{justifyContent: 'center',alignItems: 'center'}} underlayColor="white">
           <View style={styles.primaryButton} >
             <Text style={styles.buttonText}>Create</Text>
@@ -188,6 +192,7 @@ export default class App extends React.Component {
       <ScrollView style={styles.creamBackGround}>
       <View style={{justifyContent: 'center',alignItems: 'center'}}>
       <TextInput  style={[styles.primaryTextInput,{marginTop:25}]} placeholder="Game Name" autoCorrect={false}   onChangeText={(gameName) => this.setState({gameName})}/>
+      <TextInput  style={[styles.primaryTextInput,{marginTop:25}]} keyboardType='numeric' secureTextEntry={true} placeholder="Passcode" autoCorrect={false}   onChangeText={(passcode) => this.setState({passcode})}/>
       <TouchableOpacity onPress={() => this.join()}   style={{justifyContent: 'center',alignItems: 'center'}} underlayColor="white">
           <View style={styles.primaryButton} >
             <Text style={styles.buttonText}>Join</Text>
